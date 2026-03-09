@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reloj del Desfinanciamiento Universitario - SUDHUR</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .counter-box { animation: pulse-border 3s infinite; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200">
+
+    <nav class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 font-bold text-xl">
+                <i data-lucide="book-open"></i>
+                <span>#SUDHUR #UniversidadPública</span>
+            </div>
+            <a href="#cronologia" class="text-sm hover:text-blue-200 transition-colors">Ver Cronología</a>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                El Gobierno sigue sin cumplir la Ley
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                Tiempo transcurrido desde que el Presidente ignora la Ley de Financiamiento Universitario (27.795) y los fallos de la Justicia.
+            </p>
+        </header>
+
+        <div id="capture-zone" class="bg-slate-900 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden counter-box mb-8 border border-slate-700">
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-blue-600 opacity-20 blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-purple-600 opacity-20 blur-3xl"></div>
+            
+            <div class="relative z-10 text-center">
+                <p class="text-blue-300 font-semibold mb-2 uppercase tracking-widest text-sm">Tiempo en desacato</p>
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-8">Ley de Financiamiento Universitario</h2>
+                
+                <div class="flex flex-wrap justify-center gap-4 md:gap-8">
+                    <div class="flex flex-col items-center">
+                        <div class="bg-slate-800 text-blue-400 font-mono text-5xl md:text-7xl font-bold px-4 py-3 md:px-6 md:py-4 rounded-xl shadow-inner min-w-[100px] md:min-w-[140px]" id="dias">00</div>
+                        <span class="text-slate-400 mt-2 text-sm md:text-base font-semibold uppercase">Días</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-slate-800 text-white font-mono text-5xl md:text-7xl font-bold px-4 py-3 md:px-6 md:py-4 rounded-xl shadow-inner min-w-[100px] md:min-w-[140px]" id="horas">00</div>
+                        <span class="text-slate-400 mt-2 text-sm md:text-base font-semibold uppercase">Horas</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-slate-800 text-white font-mono text-5xl md:text-7xl font-bold px-4 py-3 md:px-6 md:py-4 rounded-xl shadow-inner min-w-[100px] md:min-w-[140px]" id="minutos">00</div>
+                        <span class="text-slate-400 mt-2 text-sm md:text-base font-semibold uppercase">Minutos</span>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-slate-300 text-sm md:text-base">
+                    <p>La educación pública no puede esperar. 🇦🇷</p>
+                    <p class="font-mono mt-2 opacity-50 text-xs" id="timestamp"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+            <button onclick="shareCounter()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 w-full sm:w-auto text-lg">
+                <i data-lucide="share-2"></i>
+                Compartir Contador
+            </button>
+            <div id="share-status" class="hidden text-center text-sm font-semibold text-green-600 mt-2">Generando imagen...</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="trending-down"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Pérdida Salarial del 31%</h3>
+                <p class="text-slate-600">El salario docente universitario perdió casi un tercio de su valor real entre 2023 y fines de 2025.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">SUDHUR en Lucha</h3>
+                <p class="text-slate-600">Desde la UNAHUR exigimos el cumplimiento de los fallos judiciales y la recomposición salarial urgente.</p>
+            </div>
+        </div>
+
+        <section id="cronologia" class="bg-white rounded-3xl p-6 md:p-10 shadow-lg border border-slate-200 mb-10">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-3 border-b pb-4">
+                <i data-lucide="scale" class="text-blue-600"></i>
+                Cronología del Desacato
+            </h2>
+
+            <div class="relative border-l-4 border-blue-200 ml-4 md:ml-6 space-y-8 pb-4">
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-3.5 top-1 w-6 h-6 bg-blue-600 rounded-full border-4 border-white shadow"></div>
+                    <span class="text-sm font-bold text-blue-600 uppercase tracking-wide">21 Octubre 2025</span>
+                    <h3 class="text-xl font-bold mt-1">Promulgación e Incumplimiento</h3>
+                    <p class="text-slate-600 mt-2">Se promulga la Ley 27.795. El Ejecutivo intenta suspenderla mediante el DNU 759/25.</p>
+                </div>
+
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-3.5 top-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow"></div>
+                    <span class="text-sm font-bold text-green-600 uppercase tracking-wide">Diciembre 2025</span>
+                    <h3 class="text-xl font-bold mt-1">Fallo del Juez Cormick</h3>
+                    <p class="text-slate-600 mt-2">La justicia ordena al Gobierno Nacional cumplir de forma inmediata con los fondos para las universidades.</p>
+                </div>
+
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-3.5 top-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow"></div>
+                    <span class="text-sm font-bold text-green-600 uppercase tracking-wide">5 de Marzo de 2026</span>
+                    <h3 class="text-xl font-bold mt-1">Ratificación de la Cámara</h3>
+                    <p class="text-slate-600 mt-2">La Cámara Contencioso Administrativo Federal rechaza los recursos del Gobierno y ratifica la vigencia de la ley.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center">
+        <p>Información respaldada por documentos judiciales (CAF 039475/2025).</p>
+        <p class="text-blue-400 font-bold mt-2">#UniversidadPúblicaSiempre</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // FECHA EXACTA PEDIDA: 21 de Octubre de 2025
+        const startDate = new Date('2025-10-21T00:00:00-03:00');
+
+        function updateCounter() {
+            const now = new Date();
+            const difference = now - startDate;
+            if (difference < 0) return;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((difference / 1000 / 60) % 60);
+            
+            document.getElementById('dias').innerText = days.toString().padStart(2, '0');
+            document.getElementById('horas').innerText = hours.toString().padStart(2, '0');
+            document.getElementById('minutos').innerText = minutes.toString().padStart(2, '0');
+            document.getElementById('timestamp').innerText = "Actualizado al: " + now.toLocaleString();
+        }
+
+        setInterval(updateCounter, 1000);
+        updateCounter();
+
+        async function shareCounter() {
+            const captureZone = document.getElementById('capture-zone');
+            const statusText = document.getElementById('share-status');
+            
+            try {
+                statusText.classList.remove('hidden');
+                const canvas = await html2canvas(captureZone, {
+                    scale: 2,
+                    backgroundColor: '#0f172a',
+                    useCORS: true
+                });
+
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], "contador_sudhur.png", { type: "image/png" });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'SUDHUR - Ley de Financiamiento',
+                            text: 'El tiempo pasa y el Gobierno sigue sin cumplir la ley. #UniversidadPública',
+                            files: [file]
+                        });
+                    } else {
+                        const link = document.createElement('a');
+                        link.download = 'contador_sudhur.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                        statusText.innerText = "Imagen descargada.";
+                    }
+                }, 'image/png');
+            } catch (err) {
+                statusText.innerText = "Error al generar imagen.";
+            }
+        }
+    </script>
+</body>
+</html>
