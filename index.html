@@ -7,7 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
@@ -19,6 +19,11 @@
             100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
         .counter-box { animation: pulse-border 3s infinite; }
+        
+        #capture-zone {
+            overflow: hidden;
+            -webkit-mask-image: -webkit-radial-gradient(white, black); 
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200">
@@ -139,7 +144,6 @@
     <script>
         lucide.createIcons();
 
-        // FECHA EXACTA PEDIDA: 21 de Octubre de 2025
         const startDate = new Date('2025-10-21T00:00:00-03:00');
 
         function updateCounter() {
@@ -161,40 +165,49 @@
         updateCounter();
 
         async function shareCounter() {
-            const captureZone = document.getElementById('capture-zone');
+            const node = document.getElementById('capture-zone');
             const statusText = document.getElementById('share-status');
-            
+            const width = node.offsetWidth;
+            const height = node.offsetHeight;
+
             try {
+                statusText.innerText = "Generando imagen...";
                 statusText.classList.remove('hidden');
-                const canvas = await html2canvas(captureZone, {
-                    scale: 2,
-                    backgroundColor: '#0f172a',
-                    useCORS: true
+
+                const dataUrl = await domtoimage.toPng(node, {
+                    width: width,   
+                    height: height, 
+                    style: {
+                        'margin': '0',
+                        'transform': 'scale(1)',
+                        'left': '0',
+                        'top': '0'
+                    }
                 });
 
-                canvas.toBlob(async (blob) => {
-                    const file = new File([blob], "contador_sudhur.png", { type: "image/png" });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            title: 'SUDHUR - Ley de Financiamiento',
-                            text: 'El tiempo pasa y el Gobierno sigue sin cumplir la ley. #UniversidadPública',
-                            files: [file]
-                        });
-                    } else {
-                        const link = document.createElement('a');
-                        link.download = 'contador_sudhur.png';
-                        link.href = canvas.toDataURL();
-                        link.click();
-                        statusText.innerText = "Imagen descargada.";
-                    }
-                }, 'image/png');
+                const response = await fetch(dataUrl);
+                const blob = await response.blob();
+                const file = new File([blob], "contador_sudhur.png", { type: "image/png" });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'SUDHUR - Ley de Financiamiento',
+                        text: 'El tiempo pasa y el Gobierno sigue sin cumplir la ley. #UniversidadPública',
+                        files: [file]
+                    });
+                } else {
+                    const link = document.createElement('a');
+                    link.download = 'contador_sudhur.png';
+                    link.href = dataUrl;
+                    link.click();
+                }
             } catch (err) {
+                console.error('Error:', err);
                 statusText.innerText = "Error al generar imagen.";
+            } finally {
+                setTimeout(() => statusText.classList.add('hidden'), 2000);
             }
         }
     </script>
 </body>
-
 </html>
-
-
