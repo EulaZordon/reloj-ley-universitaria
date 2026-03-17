@@ -11,7 +11,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         @keyframes pulse-border {
             0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
@@ -24,11 +24,14 @@
             overflow: hidden;
             -webkit-mask-image: -webkit-radial-gradient(white, black); 
         }
+
+        /* Clase para ocultar elementos en modo widget */
+        .widget-hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200">
 
-    <nav class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-md">
+    <nav id="main-nav" class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-md">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2 font-bold text-xl">
                 <i data-lucide="book-open"></i>
@@ -38,9 +41,9 @@
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto px-4 py-8">
+    <main id="main-content" class="max-w-4xl mx-auto px-4 py-8">
         
-        <header class="text-center mb-10">
+        <header id="main-header" class="text-center mb-10">
             <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
                 El Gobierno Nacional sigue sin cumplir la Ley
             </h1>
@@ -79,7 +82,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+        <div id="actions-area" class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
             <button onclick="shareCounter()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 w-full sm:w-auto text-lg">
                 <i data-lucide="share-2"></i>
                 Compartir Contador
@@ -87,7 +90,7 @@
             <div id="share-status" class="hidden text-center text-sm font-semibold text-green-600 mt-2">Generando imagen...</div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+        <div id="info-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
                     <i data-lucide="trending-down"></i>
@@ -136,7 +139,7 @@
 
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-8 text-center">
+    <footer id="main-footer" class="bg-slate-900 text-slate-400 py-8 text-center">
         <p>Información respaldada por documentos judiciales (CAF 039475/2025).</p>
         <p class="text-blue-400 font-bold mt-2">#UniversidadPúblicaSiempre</p>
     </footer>
@@ -144,6 +147,7 @@
     <script>
         lucide.createIcons();
 
+        // Fecha de inicio: 21 de Octubre 2025
         const startDate = new Date('2025-10-21T00:00:00-03:00');
 
         function updateCounter() {
@@ -163,6 +167,30 @@
 
         setInterval(updateCounter, 1000);
         updateCounter();
+
+        // MODO WIDGET: Detectar parámetro ?widget=true en la URL
+        function checkWidgetMode() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('widget') === 'true') {
+                // Ocultar todo menos el reloj
+                document.getElementById('main-nav').classList.add('widget-hidden');
+                document.getElementById('main-header').classList.add('widget-hidden');
+                document.getElementById('actions-area').classList.add('widget-hidden');
+                document.getElementById('info-cards').classList.add('widget-hidden');
+                document.getElementById('cronologia').classList.add('widget-hidden');
+                document.getElementById('main-footer').classList.add('widget-hidden');
+                
+                // Ajustar estilos del contenedor principal
+                document.body.style.backgroundColor = 'transparent';
+                const main = document.getElementById('main-content');
+                main.style.padding = '0';
+                main.style.marginTop = '0';
+                
+                // Quitar el margen inferior al reloj
+                document.getElementById('capture-zone').style.margin = '0';
+            }
+        }
+        checkWidgetMode();
 
         async function shareCounter() {
             const node = document.getElementById('capture-zone');
