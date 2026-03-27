@@ -13,6 +13,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
         body { font-family: 'Inter', sans-serif; transition: background-color 0.3s; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
         @keyframes pulse-border {
             0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
@@ -27,6 +28,34 @@
 
         /* Clase para ocultar elementos en modo widget */
         .widget-hidden { display: none !important; }
+
+        /* --- MEJORAS PARA EL MODO WIDGET --- */
+        body.is-widget {
+            background: transparent !important;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        body.is-widget #main-content {
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        body.is-widget #capture-zone {
+            margin: 0;
+            border-radius: 20px;
+            /* Escalamos el contenido para que quepa en 200px-250px manteniendo legibilidad */
+            transform: scale(0.45); 
+            transform-origin: top center;
+            width: 450px; /* Ancho fijo interno para evitar saltos de línea */
+            box-shadow: none;
+            animation: none; /* Quitamos la animación en el widget para ahorrar recursos */
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200">
@@ -172,22 +201,13 @@
         function checkWidgetMode() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('widget') === 'true') {
-                // Ocultar todo menos el reloj
+                document.body.classList.add('is-widget');
                 document.getElementById('main-nav').classList.add('widget-hidden');
                 document.getElementById('main-header').classList.add('widget-hidden');
                 document.getElementById('actions-area').classList.add('widget-hidden');
                 document.getElementById('info-cards').classList.add('widget-hidden');
                 document.getElementById('cronologia').classList.add('widget-hidden');
                 document.getElementById('main-footer').classList.add('widget-hidden');
-                
-                // Ajustar estilos del contenedor principal
-                document.body.style.backgroundColor = 'transparent';
-                const main = document.getElementById('main-content');
-                main.style.padding = '0';
-                main.style.marginTop = '0';
-                
-                // Quitar el margen inferior al reloj
-                document.getElementById('capture-zone').style.margin = '0';
             }
         }
         checkWidgetMode();
@@ -205,12 +225,7 @@
                 const dataUrl = await domtoimage.toPng(node, {
                     width: width,   
                     height: height, 
-                    style: {
-                        'margin': '0',
-                        'transform': 'scale(1)',
-                        'left': '0',
-                        'top': '0'
-                    }
+                    style: { 'margin': '0', 'transform': 'scale(1)', 'left': '0', 'top': '0' }
                 });
 
                 const response = await fetch(dataUrl);
