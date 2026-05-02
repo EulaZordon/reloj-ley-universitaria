@@ -69,13 +69,33 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200">
 
-    <nav id="main-nav" class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-md">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2 font-bold text-xl">
-                <i data-lucide="book-open"></i>
-                <span>Frente Sindical, Estudiantil y de Graduados de la UNAHUR #UniversidadPública</span>
+    <nav id="main-nav" class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-lg border-b border-blue-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            <div class="flex items-center gap-3">
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <i data-lucide="book-open" class="text-blue-300"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-black text-lg leading-none tracking-tight">Frente Sindical, Estudiantil y de Graduados de la UNAHUR</span>
+                    <span class="text-[10px] text-blue-300 uppercase tracking-widest font-bold mt-1 hidden md:block">
+                        #UniversidadPública
+                    </span>
+                </div>
             </div>
-            <a href="#cronologia" class="text-sm hover:text-blue-200 transition-colors">Ver Cronología</a>
+
+            <div class="flex items-center gap-4 w-full md:w-auto justify-center">
+                <a href="#cronologia" class="text-sm font-semibold hover:text-blue-300 transition-colors py-2 px-3 rounded-md hover:bg-white/5">
+                    Ver Cronología
+                </a>
+                
+                <a href="marco.html" class="group relative bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-xl text-sm font-black transition-all shadow-[0_4px_14px_0_rgba(22,163,74,0.39)] hover:shadow-green-500/50 flex items-center gap-2 overflow-hidden">
+                    <div class="absolute inset-0 w-1/2 h-full bg-white/10 skew-x-[-25deg] -left-full group-hover:left-full transition-all duration-500"></div>
+                    
+                    <i data-lucide="camera" class="w-4 h-4"></i> 
+                    <span class="relative">¡SUMÁ TU MARCO!</span>
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -205,6 +225,23 @@
                     <span class="text-sm font-bold text-green-600 uppercase tracking-wide">31 de Marzo de 2026</span>
                     <h3 class="text-xl font-bold mt-1">Ratificación de la Cámara</h3>
                     <p class="text-slate-600 mt-2"> Cámara Nacional de Apelaciones en lo Contencioso Administrativo Federal en Argentina ratificó el 31 de marzo de 2026 la vigencia de la Ley de Financiamiento Universitario (LFU), ordenando al gobierno cumplir con la actualización salarial de docentes y nodocentes, así como la recomposición de becas frente a la inflación.</p>
+                </div>
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-3.5 top-1 w-6 h-6 bg-purple-600 rounded-full border-4 border-white shadow animate-pulse"></div>
+                    
+                    <span class="text-sm font-bold text-purple-600 uppercase tracking-wide">12 de Mayo de 2026</span>
+                    <h3 class="text-xl font-bold mt-1 italic text-purple-900">Hacia la Cuarta Marcha Federal Universitaria</h3>
+                    <!-- NUEVO HISTORIAL -->
+                    <div class="bg-purple-50 border border-purple-100 rounded-2xl p-5 mt-3 shadow-sm">
+                        <p class="text-slate-700 text-sm md:text-base">
+                            Ante el incumplimiento de los fallos judiciales y el ajuste presupuestario, la comunidad universitaria vuelve a las calles. La defensa de la educación pública es ahora.
+                        </p>
+                        
+                        <a href="marco.html" class="mt-4 inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-black py-3 px-6 rounded-xl transition-all hover:scale-105 shadow-md">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                            SUMATE CON TU FOTO
+                        </a>
+                    </div>
                 </div>
 
             </div>
