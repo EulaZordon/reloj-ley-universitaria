@@ -5,14 +5,14 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const downloadBtn = document.getElementById('downloadBtn');
 const status = document.getElementById('status');
+const mainContainer = document.getElementById('mainContainer'); // Referencia al contenedor
 
 let imgUsuario = null;
 let scale = 1.0;
 let posX = 400; 
-let posY = 420; 
+let posY = 440; 
 let isDragging = false;
 let startX, startY;
-
 let initialPinchDistance = null;
 
 const marco = new Image();
@@ -21,10 +21,6 @@ marco.src = 'marco.png';
 marco.onload = () => { 
     if (status) status.innerText = ""; 
     drawAll(); 
-};
-
-marco.onerror = () => {
-    if (status) status.innerText = "Error: No se encuentra 'marco.png'. Verificá que el nombre sea idéntico.";
 };
 
 function drawAll() {
@@ -36,7 +32,6 @@ function drawAll() {
     
     if (imgUsuario) {
         ctx.save();
-        // Máscara circular para la foto
         ctx.beginPath();
         ctx.arc(400, 440, 360, 0, Math.PI * 2); 
         ctx.clip();
@@ -47,8 +42,6 @@ function drawAll() {
         ctx.drawImage(imgUsuario, posX - drawW / 2, posY - drawH / 2, drawW, drawH);
         ctx.restore();
     }
-    
-    ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
 }
 
@@ -57,7 +50,6 @@ function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
     return {
         x: (clientX - rect.left) * (canvas.width / rect.width),
         y: (clientY - rect.top) * (canvas.height / rect.height)
@@ -68,24 +60,25 @@ function getDistance(t1, t2) {
     return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
 }
 
-
 function handleStart(e) {
     if (!imgUsuario) return;
-
-    if (e.touches && e.touches.length === 2) {
-        isDragging = false;
-        initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
-    } else {
-        isDragging = true;
-        const coords = getCoordinates(e);
-        startX = coords.x;
-        startY = coords.y;
+    
+    if (e.target === canvas) {
+        if (e.touches && e.touches.length === 2) {
+            isDragging = false;
+            initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+        } else {
+            isDragging = true;
+            const coords = getCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
+        }
     }
 }
 
 function handleMove(e) {
-    if (!imgUsuario) return;
-    
+    if (!imgUsuario || (!isDragging && !initialPinchDistance)) return;
+
     if (e.cancelable) e.preventDefault();
 
     if (e.touches && e.touches.length === 2) {
@@ -93,7 +86,7 @@ function handleMove(e) {
         if (initialPinchDistance) {
             const zoomFactor = currentDistance / initialPinchDistance;
             scale *= zoomFactor;
-            initialPinchDistance = currentDistance; // Actualiza para movimiento suave
+            initialPinchDistance = currentDistance;
             drawAll();
         }
     } else if (isDragging) {
@@ -111,22 +104,22 @@ function handleEnd() {
     initialPinchDistance = null;
 }
 
-canvas.addEventListener('mousedown', handleStart);
-window.addEventListener('mousemove', handleMove);
-window.addEventListener('mouseup', handleEnd);
-
 canvas.addEventListener('touchstart', handleStart, { passive: false });
 window.addEventListener('touchmove', handleMove, { passive: false });
 window.addEventListener('touchend', handleEnd);
 
+canvas.addEventListener('mousedown', handleStart);
+window.addEventListener('mousemove', handleMove);
+window.addEventListener('mouseup', handleEnd);
+
 canvas.addEventListener('wheel', (e) => {
     if (!imgUsuario) return;
     e.preventDefault();
-    const zoomSpeed = 1.05;
-    if (e.deltaY < 0) scale *= zoomSpeed;
-    else scale /= zoomSpeed;
+    if (e.deltaY < 0) scale *= 1.05;
+    else scale /= 1.05;
     drawAll();
 }, { passive: false });
+
 
 upload.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -136,16 +129,24 @@ upload.addEventListener('change', (e) => {
     reader.onload = (event) => {
         imgUsuario = new Image();
         imgUsuario.onload = () => {
-            const minSize = 600;
+            const minSize = 720;
             scale = Math.max(minSize / imgUsuario.width, minSize / imgUsuario.height);
             posX = 400;
-            posY = 440; 
+            posY = 440;
             
             drawAll();
             
             canvas.style.display = 'block';
-            downloadBtn.classList.remove('hidden'); 
             downloadBtn.style.display = 'flex';
+            downloadBtn.classList.add('btn-descarga-flotante');
+            
+            if (mainContainer) {
+                mainContainer.classList.add('padding-bottom-extra');
+            }
+            
+            setTimeout(() => {
+                canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         };
         imgUsuario.src = event.target.result;
     };
@@ -162,7 +163,6 @@ downloadBtn.addEventListener('click', () => {
         link.click();
         document.body.removeChild(link);
     } catch (err) {
-        console.error("Error en la descarga:", err);
-        alert("Error al generar imagen. Si usas Chrome/Safari en móvil, intentá mantener presionada la imagen para guardarla.");
+        alert("Error al descargar. Si estás en iPhone, mantené presionada la imagen para guardarla.");
     }
 });
