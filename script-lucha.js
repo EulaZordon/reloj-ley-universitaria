@@ -22,16 +22,20 @@ marco.onload = () => {
 };
 
 marco.onerror = () => {
-    status.innerText = "Error: No se encuentra 'marco.png'. Verificá que el nombre sea idéntico (minúsculas/mayúsculas).";
+    status.innerText = "Error: No se encuentra 'marco.png'. Verificá que el nombre sea idéntico.";
 };
 
 function drawAll() {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Fondo blanco
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
     if (imgUsuario) {
         ctx.save();
+        // Máscara circular para la foto
         ctx.beginPath();
         ctx.arc(400, 440, 360, 0, Math.PI * 2); 
         ctx.clip();
@@ -43,10 +47,73 @@ function drawAll() {
         ctx.restore();
     }
 
+    // Dibujar el marco encima
     ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
 }
 
+// --- LÓGICA DE INTERACCIÓN (MOUSE & TOUCH) ---
+
+function getCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    // Detecta si es evento táctil o de mouse
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+function handleStart(e) {
+    if (!imgUsuario) return;
+    isDragging = true;
+    const coords = getCoordinates(e);
+    startX = coords.x;
+    startY = coords.y;
+}
+
+function handleMove(e) {
+    if (!isDragging || !imgUsuario) return;
+
+    // IMPORTANTE: Evita el scroll en móviles mientras arrastrás
+    if (e.cancelable) e.preventDefault();
+
+    const coords = getCoordinates(e);
+    
+    posX += (coords.x - startX);
+    posY += (coords.y - startY);
+    
+    startX = coords.x;
+    startY = coords.y;
+    drawAll();
+}
+
+function handleEnd() {
+    isDragging = false;
+}
+
+// Listeners para Mouse
+canvas.addEventListener('mousedown', handleStart);
+window.addEventListener('mousemove', handleMove);
+window.addEventListener('mouseup', handleEnd);
+
+// Listeners para Touch (Celulares)
+canvas.addEventListener('touchstart', handleStart, { passive: false });
+window.addEventListener('touchmove', handleMove, { passive: false });
+window.addEventListener('touchend', handleEnd);
+
+// Zoom con rueda (PC)
+canvas.addEventListener('wheel', (e) => {
+    if (!imgUsuario) return;
+    e.preventDefault();
+    if (e.deltaY < 0) scale *= 1.05;
+    else scale /= 1.05;
+    drawAll();
+}, { passive: false });
+
+// Carga de imagen
 upload.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -62,7 +129,6 @@ upload.addEventListener('change', (e) => {
             
             drawAll();
             
-            // Forzamos la visibilidad eliminando la clase de Tailwind y cambiando el style
             canvas.style.display = 'block';
             downloadBtn.classList.remove('hidden'); 
             downloadBtn.style.display = 'flex';
@@ -72,38 +138,7 @@ upload.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
-
-canvas.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    const rect = canvas.getBoundingClientRect();
-    startX = (e.clientX - rect.left) * (canvas.width / rect.width);
-    startY = (e.clientY - rect.top) * (canvas.height / rect.height);
-});
-
-window.addEventListener('mousemove', (e) => {
-    if (!isDragging || !imgUsuario) return;
-    const rect = canvas.getBoundingClientRect();
-    const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
-    
-    posX += (currentX - startX);
-    posY += (currentY - startY);
-    startX = currentX;
-    startY = currentY;
-    drawAll();
-});
-
-window.addEventListener('mouseup', () => isDragging = false);
-
-// Zoom con rueda
-canvas.addEventListener('wheel', (e) => {
-    if (!imgUsuario) return;
-    e.preventDefault();
-    if (e.deltaY < 0) scale *= 1.05;
-    else scale /= 1.05;
-    drawAll();
-}, { passive: false });
-
+// Descarga
 downloadBtn.addEventListener('click', (e) => {
     try {
         const dataURL = canvas.toDataURL('image/png');
@@ -115,6 +150,6 @@ downloadBtn.addEventListener('click', (e) => {
         document.body.removeChild(link);
     } catch (err) {
         console.error("Error en la descarga:", err);
-        alert("No se pudo generar la imagen. Si estás en modo local, probá subiéndolo a GitHub.");
+        alert("No se pudo generar la imagen. Si estás en modo local (abriendo el archivo .html directamente), probá subiendo los archivos a un servidor o GitHub Pages.");
     }
 });
