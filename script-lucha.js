@@ -13,23 +13,24 @@ let posY = 420;
 let isDragging = false;
 let startX, startY;
 
+let initialPinchDistance = null;
+
 const marco = new Image();
 marco.src = 'marco.png';
 
 marco.onload = () => { 
-    status.innerText = ""; 
+    if (status) status.innerText = ""; 
     drawAll(); 
 };
 
 marco.onerror = () => {
-    status.innerText = "Error: No se encuentra 'marco.png'. Verificá que el nombre sea idéntico.";
+    if (status) status.innerText = "Error: No se encuentra 'marco.png'. Verificá que el nombre sea idéntico.";
 };
 
 function drawAll() {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Fondo blanco
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
@@ -46,17 +47,14 @@ function drawAll() {
         ctx.drawImage(imgUsuario, posX - drawW / 2, posY - drawH / 2, drawW, drawH);
         ctx.restore();
     }
-
-    // Dibujar el marco encima
+    
     ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
 }
 
-// --- LÓGICA DE INTERACCIÓN (MOUSE & TOUCH) ---
 
 function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
-    // Detecta si es evento táctil o de mouse
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
@@ -66,54 +64,70 @@ function getCoordinates(e) {
     };
 }
 
+function getDistance(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+}
+
+
 function handleStart(e) {
     if (!imgUsuario) return;
-    isDragging = true;
-    const coords = getCoordinates(e);
-    startX = coords.x;
-    startY = coords.y;
+
+    if (e.touches && e.touches.length === 2) {
+        isDragging = false;
+        initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+    } else {
+        isDragging = true;
+        const coords = getCoordinates(e);
+        startX = coords.x;
+        startY = coords.y;
+    }
 }
 
 function handleMove(e) {
-    if (!isDragging || !imgUsuario) return;
-
-    // IMPORTANTE: Evita el scroll en móviles mientras arrastrás
+    if (!imgUsuario) return;
+    
     if (e.cancelable) e.preventDefault();
 
-    const coords = getCoordinates(e);
-    
-    posX += (coords.x - startX);
-    posY += (coords.y - startY);
-    
-    startX = coords.x;
-    startY = coords.y;
-    drawAll();
+    if (e.touches && e.touches.length === 2) {
+        const currentDistance = getDistance(e.touches[0], e.touches[1]);
+        if (initialPinchDistance) {
+            const zoomFactor = currentDistance / initialPinchDistance;
+            scale *= zoomFactor;
+            initialPinchDistance = currentDistance; // Actualiza para movimiento suave
+            drawAll();
+        }
+    } else if (isDragging) {
+        const coords = getCoordinates(e);
+        posX += (coords.x - startX);
+        posY += (coords.y - startY);
+        startX = coords.x;
+        startY = coords.y;
+        drawAll();
+    }
 }
 
 function handleEnd() {
     isDragging = false;
+    initialPinchDistance = null;
 }
 
-// Listeners para Mouse
 canvas.addEventListener('mousedown', handleStart);
 window.addEventListener('mousemove', handleMove);
 window.addEventListener('mouseup', handleEnd);
 
-// Listeners para Touch (Celulares)
 canvas.addEventListener('touchstart', handleStart, { passive: false });
 window.addEventListener('touchmove', handleMove, { passive: false });
 window.addEventListener('touchend', handleEnd);
 
-// Zoom con rueda (PC)
 canvas.addEventListener('wheel', (e) => {
     if (!imgUsuario) return;
     e.preventDefault();
-    if (e.deltaY < 0) scale *= 1.05;
-    else scale /= 1.05;
+    const zoomSpeed = 1.05;
+    if (e.deltaY < 0) scale *= zoomSpeed;
+    else scale /= zoomSpeed;
     drawAll();
 }, { passive: false });
 
-// Carga de imagen
 upload.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -125,7 +139,7 @@ upload.addEventListener('change', (e) => {
             const minSize = 600;
             scale = Math.max(minSize / imgUsuario.width, minSize / imgUsuario.height);
             posX = 400;
-            posY = 420;
+            posY = 440; 
             
             drawAll();
             
@@ -138,8 +152,7 @@ upload.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
-// Descarga
-downloadBtn.addEventListener('click', (e) => {
+downloadBtn.addEventListener('click', () => {
     try {
         const dataURL = canvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -150,6 +163,6 @@ downloadBtn.addEventListener('click', (e) => {
         document.body.removeChild(link);
     } catch (err) {
         console.error("Error en la descarga:", err);
-        alert("No se pudo generar la imagen. Si estás en modo local (abriendo el archivo .html directamente), probá subiendo los archivos a un servidor o GitHub Pages.");
+        alert("Error al generar imagen. Si usas Chrome/Safari en móvil, intentá mantener presionada la imagen para guardarla.");
     }
 });
