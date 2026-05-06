@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convocatoria - 4ta Marcha Federal Universitaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;800&family=JetBrains+Mono:wght@700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: transparent; 
+            overflow: hidden; /* Evita que el cuerpo genere scroll */
+            margin: 0;
+        }
+
+        /* Ajuste opcional: si el contenido es muy alto, reducimos un poco los paddings */
+        .p-8 { padding: 1.5rem !important; }
+
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-[2rem] max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100">
+        <div class="bg-blue-900 p-8 text-white text-center relative">
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-blue-600 opacity-20 blur-3xl"></div>
+            <span class="bg-orange-500 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-[0.2em] relative z-10">
+                Próximamente
+            </span>
+            <h2 class="text-3xl font-black mt-4 leading-tight relative z-10">4ta Marcha Federal Universitaria</h2>
+            <p class="text-blue-300 mt-2 font-medium relative z-10">Faltan muy pocos dias para volver a las calles en defensa nuestra Universidad Pública</p>
+        </div>
+        
+        <div class="p-8 text-center bg-slate-50">
+            <p class="text-slate-500 mb-8 text-sm font-semibold uppercase tracking-wide">Tiempo restante:</p>
+            
+            <div class="grid grid-cols-4 gap-3 mb-10">
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="text-3xl font-black text-slate-900 font-mono" id="d">00</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 mt-1">Días</div>
+                </div>
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="text-3xl font-black text-slate-900 font-mono" id="h">00</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 mt-1">Horas</div>
+                </div>
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="text-3xl font-black text-slate-900 font-mono" id="m">00</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 mt-1">Mins</div>
+                </div>
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-orange-200">
+                    <div class="text-3xl font-black text-orange-600 font-mono" id="s">00</div>
+                    <div class="text-[9px] uppercase font-bold text-orange-400 mt-1">Segs</div>
+                </div>
+            </div>
+
+            <button onclick="cerrarPadre()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-lg hover:shadow-blue-200 hover:-translate-y-1 active:scale-95">
+            ¡Allí estaremos!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const target = new Date('2026-05-12T10:00:00-03:00');
+
+        function cerrarPadre() {
+        // Envía un mensaje al index.html para avisar que debe cerrarse
+        window.parent.postMessage('cerrar-modal', '*');
+    }
+
+        function update() {
+            const now = new Date();
+            const diff = target - now;
+
+            if (diff <= 0) {
+                document.body.innerHTML = `
+                    <div class="text-center p-10 bg-blue-900 text-white rounded-3xl shadow-2xl">
+                        <h1 class="text-5xl font-black mb-4">¡ES HOY!</h1>
+                        <p class="text-xl opacity-80 uppercase tracking-widest font-bold">Nos vemos en las calles</p>
+                    </div>`;
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / (1000 * 60)) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('d').innerText = d.toString().padStart(2, '0');
+            document.getElementById('h').innerText = h.toString().padStart(2, '0');
+            document.getElementById('m').innerText = m.toString().padStart(2, '0');
+            document.getElementById('s').innerText = s.toString().padStart(2, '0');
+        }
+
+        setInterval(update, 1000);
+        update();
+    </script>
+</body>
+</html>
