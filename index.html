@@ -68,7 +68,7 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-200">
-
+    <div id="alert-container"></div>
     <nav id="main-nav" class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-lg border-b border-blue-800">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             
@@ -268,12 +268,33 @@
             const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
             const minutes = Math.floor((difference / 1000 / 60) % 60);
             
-            document.getElementById('dias').innerText = days.toString().padStart(2, '0');
+            const diasElement = document.getElementById('dias');
+            const alertContainer = document.getElementById('alert-container');
+            
+            diasElement.innerText = days.toString().padStart(2, '0');
             document.getElementById('horas').innerText = hours.toString().padStart(2, '0');
             document.getElementById('minutos').innerText = minutes.toString().padStart(2, '0');
             document.getElementById('timestamp').innerText = "Actualizado al: " + now.toLocaleString();
-        }
 
+            if (days >= 200) {
+                diasElement.classList.remove('text-blue-400');
+                diasElement.classList.add('text-red-500', 'animate-pulse'); 
+
+                if (alertContainer && alertContainer.innerHTML === "") {
+                    alertContainer.innerHTML = `
+                        <div class="bg-red-600 text-white text-center py-3 px-4 font-black uppercase tracking-tighter animate-pulse z-[60] relative border-b-2 border-red-800">
+                            <i data-lucide="alert-octagon" class="inline-block mr-2 w-5 h-5 align-middle"></i>
+                            ¡URGENTE: 200 DÍAS DE INCUMPLIMIENTO DE LA LEY DE FINANCIAMIENTO!
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            } else {
+                diasElement.classList.remove('text-red-500', 'animate-pulse');
+                diasElement.classList.add('text-blue-400');
+                if (alertContainer) alertContainer.innerHTML = "";
+            }
+        }
         setInterval(updateCounter, 1000);
         updateCounter();
 
@@ -352,7 +373,6 @@
             }
         });
 
-        // Escuchamos el mensaje desde el iframe para cerrar el modal
         window.addEventListener('message', (event) => {
             if (event.data === 'cerrar-modal') {
                 const modal = document.getElementById('marcha-pop');
